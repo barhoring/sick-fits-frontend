@@ -6,7 +6,7 @@ import PaginationStyles from './styles/PaginationStyles';
 import DisplayError from './ErrorMessage';
 import { perPage } from '../config';
 
-const PAGINATION_QUERY = qgl`
+export const PAGINATION_QUERY = qgl`
 query PAGINATION_QUERY {
   _allProductsMeta {
     count
