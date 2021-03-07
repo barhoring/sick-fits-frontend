@@ -16,7 +16,6 @@ query PAGINATION_QUERY {
 
 export default function Pagination({ page }) {
   const { error, loading, data } = useQuery(PAGINATION_QUERY);
-  console.log(error, loading, data);
   if (loading) return 'Loading';
   if (error) return <DisplayError error={error} />;
 
