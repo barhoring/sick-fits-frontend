@@ -1,5 +1,11 @@
-import { CardElement, Elements } from '@stripe/react-stripe-js';
+import {
+  CardElement,
+  Elements,
+  useElements,
+  useStripe,
+} from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+import nProgress from 'nprogress';
 import { useState } from 'react';
 import styled from 'styled-components';
 import SickButton from './styles/SickButton';
@@ -19,19 +25,49 @@ function CheckoutForm() {
   const [error, setError] = useState();
   const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e) {
+  const stripe = useStripe();
+  const elements = useElements();
+  async function handleSubmit(e) {
+    // 1. Stop the form from submitting and turn the loader on
     e.preventDefault();
     console.log('we gotta do some work');
+    setLoading(true);
+    // 2. Start the page transition
+    nProgress.start();
+    // 3. Create payment method via Stripe (Token comes back here is successful)
+    const { error, paymentMethod } = await stripe.createPaymentMethod({
+      type: 'card',
+      card: elements.getElement(CardElement),
+    });
+    console.log(paymentMethod);
+    // 4. Handle any errors from Stripe
+    if (error) {
+      setError(error);
+    }
+    // 5. Send the token from Step 3 to our keystore server via a custom mutation
+
+    // 6. Change the page to view the order
+    // 7. Close the Cart
+    // 8. Turn the loader off
+    setLoading(false);
+    nProgress.done();
   }
 
   return (
+    <CheckoutFormStyles onSubmit={handleSubmit}>
+      {error && <p style={{ fontSize: 12 }}>Error: {error.message}</p>}
+      <CardElement />
+      <SickButton>Checkout Now </SickButton>
+    </CheckoutFormStyles>
+  );
+}
+
+function Checkout() {
+  return (
     <Elements stripe={stripeLib}>
-      <CheckoutFormStyles onSubmit={handleSubmit}>
-        <CardElement />
-        <SickButton>Checkout Now </SickButton>
-      </CheckoutFormStyles>
+      <CheckoutForm />
     </Elements>
   );
 }
 
-export { CheckoutForm };
+export { Checkout };
